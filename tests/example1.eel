@@ -26,7 +26,6 @@ program example1
 	endfunction
 
 	i:=5;
-	g:=1;
+	g:=1
 						//call one (in g)
 endprogram
-			

@@ -4,7 +4,7 @@
 import sys
 
 #read filename from command line and open it (in form: python3 met.py test.eel)
-file = sys.argv[1] 
+file = sys.argv[1]
 #file=input("Please input a file:\n") #other case, user inserts file name
 
 try:
@@ -12,7 +12,7 @@ try:
 except IOError:
     print ("Could not read file:", file)
     exit()
-    
+
 #initializing end of file position
 eof = f.seek(0,2)
 f.seek(0,0)
@@ -66,58 +66,58 @@ pars = []
 def  nextquad():
     global quad_counter
     global quadsList
-    
+
     temp = str(len(quadsList))
     return temp
-    
+
 def genquad(op, x, y, z):
     global quadsList
     global quad_counter
-    
+
     quads = [nextquad(), [op, x, y, z]]
     quadsList.append(quads)
     return quads
-    
+
 def newtemp():
     global temp_var
-    
+
     temp = 'T_' + str(temp_var)
     temp_var += 1
     addEntity(temp, "tempvar", None)  #symbol table
     return temp
-    
+
 def emptylist():
-                    
+
     temp = []
     return temp
-    
+
 def makelist(x):
-    
+
     temp = []
     temp.append(x)
     return temp
-    
+
 def merge(list1, list2):
-    
+
     temp = list1 + list2
     return temp
 
 def backpatch(mylist, z):
     global quadsList
-    
+
     for p in mylist:
         for i in quadsList:
             if p == i[0]:
                 i[1][3] = z
-        
+
 ####
-    
+
 def lex():
     global token
     global value
     global lines
     global eof
-    
+
     #states, rows of the matrix
     state0 = 0
     state1 = 1
@@ -131,7 +131,7 @@ def lex():
     state9 = 9
     error = -1
     OK = -2
-    
+
     alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     numbers = '0123456789'
     whitespace = [' ','\t','\r']
@@ -139,7 +139,7 @@ def lex():
                       'repeat','endrepeat','exit','switch','case','endswitch','forcase','when','endforcase','procedure',
                       'endprocedure','function','endfunction','call','return','in','inout','and','or','not','true','false',
                       'input','print']
-    
+
     #words, columns of the matrix
     letter = 0
     digit = 1
@@ -160,7 +160,7 @@ def lex():
     end_of_file = 16
     end_of_line = 17
     other = 18
-    
+
     #transition matrix
     T = [[state1,state2,OK,OK,OK,state6,state3,state4,OK,state5,OK,OK,OK,OK,OK,OK,OK,state0,state0],
          [state1,state1,OK,OK,OK,OK,OK,OK,OK,OK,OK,OK,OK,OK,OK,OK,OK,OK,OK],
@@ -172,17 +172,17 @@ def lex():
          [state7,state7,state7,state7,state7,state7,state7,state7,state7,state7,state7,state7,state7,state7,state7,state7,state7,state0,state7],
          [state8,state8,state8,state8,state9,state8,state8,state8,state8,state8,state8,state8,state8,state8,state8,state8,error,state8,state8],
          [state8,state8,state8,state8,state8,state0,state8,state8,state8,state8,state8,state8,state8,state8,state8,state8,error,state8,state8]]
-     
+
     flag_slash = False #case of line comments
     flag_star = False #case of block comments
     flag_less = False #case of < character
     flag_letter = False #case of word starts with letter
-    
+
     state = state0
     word = 0
     comments = 0
     chars = ""
-    
+
     while state!=OK and state!=error:
         if f.seek(0,1) == eof:
             value = ""
@@ -190,10 +190,10 @@ def lex():
             if flag_star == True:
                 print("Lex_Error: Line",comments,"-> Comments open and never get closed!")
             break
-                
+
         c = f.read(1)
         c = c.decode('ascii')
-        
+
         if c in alphabet:
             word = letter
             if flag_slash != True and flag_star != True: #if character isn't in comments
@@ -210,13 +210,13 @@ def lex():
                 else:
                     d = f.read(1) #check next character
                     d = d.decode('ascii')
-                    f.seek(-1,1) #go back to previous position
-                    if ((d not in alphabet) and (d not in numbers)): #last character of the word
-                        if len(chars)> 30: #check len of word
+                    f.seek(-1, 1) #go back to previous position
+                    if (d not in alphabet) and (d not in numbers): #last character of the word
+                        if len(chars) > 30: #check len of word
                             chars = chars[0:30]
                         if chars in reserved_words:
                             value = chars
-                            token = chars+'tk'
+                            token = chars + 'tk'
                         else:
                             value = chars
                             token = 'idtk'
@@ -234,11 +234,11 @@ def lex():
                     d = f.read(1)
                     d = d.decode('ascii')
                     f.seek(-1,1)
-                    if d in alphabet and flag_letter == False: #if letter after number
+                    if (d in alphabet) and flag_letter == False: #if letter after number
                         #read full wrong word
                         d = f.read(1)
                         d = d.decode('ascii')
-                        while(d in alphabet or d in numbers):
+                        while d in alphabet or d in numbers:
                             d = f.read(1)
                             d = d.decode('ascii')
                         f.seek(-1,1)
@@ -297,7 +297,7 @@ def lex():
                 d = f.read(1)
                 d = d.decode('ascii')
                 f.seek(-1,1)
-                if d == '>' or d == '=': 
+                if d == '>' or d == '=':
                     flag_less = True #word starts with < and next character is > or =
                 else: #less character
                     value = chars
@@ -387,7 +387,7 @@ def lex():
             if flag_slash == True and flag_star != True: #if character is in line comments
                 word = end_of_line
                 flag_slash = 0 #close line comments
-            else: 
+            else:
                 word = other #new line character is whitespace character
         elif c in whitespace:
             word = other
@@ -397,10 +397,10 @@ def lex():
             value = ""
             token = ""
             exit()
-        
-        #next state       
+
+        #next state
         state = T[state][word]
-        
+
 ######################################################
 
 def program():
@@ -410,31 +410,36 @@ def program():
     global program_name
     global needsReturn
     global hasReturn
-    
+
     lex()
-    if(token=="programtk"):
+    if token=="programtk":
         lex()
-        if(token=="idtk"):
+        if token=="idtk":
             addScope()  #symbol table
             program_name = value  #intermediate code
             lex()
-            needsReturn.append(False)  #semantic analisys
-            hasReturn.append(False)  #semantic analisys
+            needsReturn.append(False)  #semantic analysis
+            hasReturn.append(False)  #semantic analysis
             block(program_name)  #intermediate code
-            if(token=="endprogramtk"):
+            if token=="endprogramtk":
                 lex()
-                if(token=="eoftk"):
+                if token=="eoftk":
                     pass
                 else:
                     print("Warning: Line",lines,"-> Text found after 'endprogram' keyword!")
                     exit()
-            else: 
-                print("Syntax_Error: Line",lines,"-> Missing 'endprogram' keyword!")
-                exit()
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing Program ID!")
+            else:
+                lex()
+                if token=="eoftk":
+                    print("Syntax_Error: Line",lines,"-> Missing 'endprogram' keyword!")
+                    exit()
+                else:
+                    print("Syntax_Error: Line", lines,"-> Missing ';', between statements")
+                    exit()
+        else:
+            print("Syntax_Error: Line",lines,"-> Missing Program id!")
             exit()
-    else: 
+    else:
         print("Syntax_Error: Line",lines,"-> Missing 'program' keyword!")
         exit()
 
@@ -444,7 +449,9 @@ def block(name):
     global needsReturn
     global hasReturn
     global lines
-    
+
+    global token
+
     declarations()
     subprograms()
     genquad("begin_block",name,"_","_")  #intermediate code
@@ -454,19 +461,20 @@ def block(name):
     else:  #symbol table
         setSQ(SQ)  #symbol table
     statements()
+
     if name == program_name:
         genquad("halt","_","_","_")  #intermediate code
-    if needsReturn[len(needsReturn)-1]==True and hasReturn[len(needsReturn)-1]==False:  #semantic analisys
-        print("Semantic_Error: Line", lines, "-> In function ", name, " missing return statement!")  #semantic analisys
-        exit()  #semantic analisys
-    elif needsReturn[len(needsReturn)-1]==False and hasReturn[len(needsReturn)-1]==True:  #semantic analisys
-        if name == program_name:  #semantic analisys
-            print("Semantic_Error: Line", lines, "-> Found return statement in main function!")  #semantic analisys
-        else:  #semantic analisys
-            print("Semantic_Error: Line", lines, "-> Found return statement in procedure ", name, " !")  #semantic analisys
-        exit()  #semantic analisys
-    needsReturn.pop()  #semantic analisys
-    hasReturn.pop()  #semantic analisys
+    if needsReturn[len(needsReturn)-1]==True and hasReturn[len(needsReturn)-1]==False:  #semantic analysis
+        print("Semantic_Error: Line", lines, "-> In function ", name, " missing return statement!")  #semantic analysis
+        exit()  #semantic analysis
+    elif needsReturn[len(needsReturn)-1]==False and hasReturn[len(needsReturn)-1]==True:  #semantic analysis
+        if name == program_name:  #semantic analysis
+            print("Semantic_Error: Line", lines, "-> Found return statement in main function!")  #semantic analysis
+        else:  #semantic analysis
+            print("Semantic_Error: Line", lines, "-> Found return statement in procedure ", name, " !")  #semantic analysis
+        exit()  #semantic analysis
+    needsReturn.pop()  #semantic analysis
+    hasReturn.pop()  #semantic analysis
     genquad("end_block",name,"_","_")  #intermediate code
     calculateFL()  #symbol table
     if name == program_name:  #final code
@@ -474,20 +482,20 @@ def block(name):
     else:
         finalCode(False)
     removeScope()  #symbol table
-    
+
 
 ######################################################
 
 def declarations():
     global token
     global lines
-    
-    if(token=="declaretk"):
+
+    if token=="declaretk":
         lex()
         varlist()
-        if(token=="enddeclaretk"):
+        if token=="enddeclaretk":
             lex()
-        else: 
+        else:
             print("Syntax_Error: Line",lines,"-> Missing enddeclare keyword!")
             exit()
 
@@ -497,28 +505,34 @@ def varlist():
     global token
     global lines
     global value
-    
-    if(token=="idtk"):
-        checkEntityExists(value)  #symbol table
+
+    if token=="idtk":
+        checkEntityExists(value)  #semantic analysis
         addEntity(value, "variable", None)  #symbol table
         lex()
-        while(token=="commatk"): 
+        while token=="commatk":
             lex()
-            if(token=="idtk"):
-                checkEntityExists(value)  #symbol table
+            if token=="idtk":
+                checkEntityExists(value)  #semantic analysis
                 addEntity(value, "variable", None)  #symbol table
                 lex()
-            else: 
+            else:
                 print("Syntax_Error: Line",lines,"-> Bad usage of comma, id expected!")
                 exit()
+    elif token=="enddeclaretk":
+        pass
+    else:
+        print("Syntax_Error: Line",lines,"->",value,"is not an id!")
+        exit()
+
 
 #####################################################
 
 def subprograms():
     global token
     global lines
-    
-    while(token=="proceduretk" or token=="functiontk"):
+
+    while token=="proceduretk" or token=="functiontk":
         procorfunc()
 
 #####################################################
@@ -531,50 +545,47 @@ def procorfunc():
     global procedures
     global needsReturn
     global hasReturn
-    
-    if(token=="proceduretk"):
-        needsReturn.append(False)  #semantic analisys
-        hasReturn.append(False)  #semantic analisys
+
+    if token=="proceduretk":
+        needsReturn.append(False)  #semantic analysis
+        hasReturn.append(False)  #semantic analysis
         lex()
-        if(token=="idtk"):
-            checkEntityExists(value)  #symbol table
+        if token=="idtk":
+            checkEntityExists(value)  #semantic analysis
             addEntity(value, "procorfunc", "procedure")  #symbol table
             addScope()  #symbol table
             procedures.append(value)  #intermediate code
             name = value  #intermediate code
             lex()
             procorfuncbody(name)
-            if(token=="endproceduretk"):
+            if token=="endproceduretk":
                 lex()
-            else: 
+            else:
                 print("Syntax_Error: Line",lines,"-> Missing 'endprocedure' word. Procedure never ends!")
                 exit()
-        else: 
+        else:
             print("Syntax_Error: Line",lines,"-> Missing procedure id!")
             exit()
-    elif(token=="functiontk"):
-        needsReturn.append(True)  #semantic analisys
-        hasReturn.append(False)  #semantic analisys
+    elif token=="functiontk":
+        needsReturn.append(True)  #semantic analysis
+        hasReturn.append(False)  #semantic analysis
         lex()
-        if(token=="idtk"):
-            checkEntityExists(value)  #symbol table
+        if token=="idtk":
+            checkEntityExists(value)  #semantic analysis
             addEntity(value, "procorfunc", "function")  #symbol table
             addScope()  #symbol table
             functions.append(value)  #intermediate code
             name = value #intermediate code
             lex()
             procorfuncbody(name)
-            if(token=="endfunctiontk"):
+            if token=="endfunctiontk":
                 lex()
             else:
                 print("Syntax_Error: Line",lines,"-> Missing 'endfunction' word. Function never ends!")
                 exit()
-        else: 
+        else:
             print("Syntax_Error: Line",lines,"-> Missing function id!")
             exit()
-    else: 
-        print("Syntax_Error: Line",lines,"-> No 'procedure' or 'function' keyword found!")
-        exit()
 
 #####################################################
 
@@ -587,16 +598,16 @@ def procorfuncbody(name):
 def formalpars():
     global token
     global lines
-    
-    if(token=="openroundbrackettk"):
+
+    if token=="openroundbrackettk":
         lex()
         formalparlist()
-        if(token=="closeroundbrackettk"):
+        if token=="closeroundbrackettk":
             lex()
-        else: 
+        else:
             print("Syntax_Error: Line",lines,"-> Missing ')' character. Brackets never close!")
             exit()
-    else: 
+    else:
         print("Syntax_Error: Line",lines,"-> Missing '('. No brackets detected!")
         exit()
 
@@ -605,9 +616,9 @@ def formalpars():
 def formalparlist():
     global token
     global lines
-    
+
     formalparitem()
-    while(token=="commatk"):
+    while token=="commatk":
         lex()
         formalparitem()
 
@@ -617,27 +628,16 @@ def formalparitem():
     global token
     global lines
     global value
-    
-    if(token=="intk"):
+
+    if token=="intk" or token=="inouttk":
         PARMODE = value
         addArgument(PARMODE)  #symbol table
         lex()
-        if(token=="idtk"):
-            checkEntityExists(value)  #symbol table
+        if token=="idtk":
+            checkEntityExists(value)  #semantic analysis
             addEntity(value, "parameter", PARMODE)  #symbol table
             lex()
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing id!")
-            exit()
-    elif(token=="inouttk"):
-        PARMODE = value
-        addArgument(PARMODE)  #symbol table
-        lex()
-        if(token=="idtk"):
-            checkEntityExists(value)  #symbol table
-            addEntity(value, "parameter", PARMODE)  #symbol table
-            lex()
-        else: 
+        else:
             print("Syntax_Error: Line",lines,"-> Missing id!")
             exit()
 
@@ -646,9 +646,9 @@ def formalparitem():
 def statements():
     global token
     global lines
-    
+
     statement()
-    while(token=="semicolontk"):
+    while token=="semicolontk":
         lex()
         statement()
 
@@ -657,28 +657,28 @@ def statements():
 def statement():
     global token
     global lines
-    
-    if(token=="idtk"):
+
+    if token=="idtk":
         assignment_stat()
-    elif(token=="iftk"):
+    elif token=="iftk":
         if_stat()
-    elif(token=="whiletk"):
+    elif token=="whiletk":
         while_stat()
-    elif(token=="repeattk"):
+    elif token=="repeattk":
         repeat_stat()
-    elif(token=="exittk"):
+    elif token=="exittk":
         exit_stat()
-    elif(token=="switchtk"):
+    elif token=="switchtk":
         switch_stat()
-    elif(token=="forcasetk"):
+    elif token=="forcasetk":
         forcase_stat()
-    elif(token=="calltk"):
+    elif token=="calltk":
         call_stat()
-    elif(token=="returntk"):
+    elif token=="returntk":
         return_stat()
-    elif(token=="inputtk"): 
+    elif token=="inputtk":
         input_stat()
-    elif(token=="printtk"): 
+    elif token=="printtk":
         print_stat()
 
 ######################################################
@@ -687,57 +687,48 @@ def assignment_stat():
     global token
     global lines
     global value
-    
-    if(token=="idtk"):
-        searchEntity(value, "VAR")  #symbol table
-        NAME = value  #intermediate code
+
+    searchEntity(value, "VAR")  #symbol table
+    NAME = value  #intermediate code
+    lex()
+    if token=="assignmenttk":
         lex()
-        if(token=="assignmenttk"):
-            lex()
-            E_place = expression()  #intermediate code
-            genquad(":=",E_place,"_",NAME)  #intermediate code
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing assignment symbol!")
-            exit()
-    else: 
-        print("Syntax_Error: Line",lines,"-> Missing id name!")
+        E_place = expression()  #intermediate code
+        genquad(":=",E_place,"_",NAME)  #intermediate code
+    else:
+        print("Syntax_Error: Line",lines,"-> Missing assignment symbol!")
         exit()
-    
 
 #######################################################
 
 def if_stat():
     global token
     global lines
-    
-    if(token=="iftk"):
+
+    lex()
+    B = condition()  #intermediate code
+    B_true = B[0]  #intermediate code
+    B_false = B[1]  #intermediate code
+    if token=="thentk":
         lex()
-        B = condition()  #intermediate code
-        B_true = B[0]  #intermediate code
-        B_false = B[1]  #intermediate code
-        if(token=="thentk"):
+        backpatch(B_true,nextquad())  #intermediate code
+        statements()
+        if token=="endiftk":
+            backpatch(B_false,nextquad())  #intermediate code
             lex()
-            backpatch(B_true,nextquad())  #intermediate code
-            statements()
-            if(token=="endiftk"):
-                backpatch(B_false,nextquad())  #intermediate code
+        elif token=="elsetk":
+            ifList = makelist(nextquad())  #intermediate code
+            genquad("jump","_","_","_")  #intermediate code
+            backpatch(B_false,nextquad())  #intermediate code
+            elsepart()
+            backpatch(ifList,nextquad())  #intermediate code
+            if token=="endiftk":
                 lex()
-            elif(token=="elsetk"):
-                ifList = makelist(nextquad())  #intermediate code
-                genquad("jump","_","_","_")  #intermediate code
-                backpatch(B_false,nextquad())  #intermediate code
-                elsepart()
-                backpatch(ifList,nextquad())  #intermediate code
-                if(token=="endiftk"):
-                    lex()
-            else: 
-                print("Syntax_Error: Line",lines,"-> Missing 'endif' word. If command never ends!")
-                exit()
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing 'then' word!")
+        else:
+            print("Syntax_Error: Line",lines,"-> Missing 'endif' word. If command never ends!")
             exit()
-    else: 
-        print("Syntax_Error: Line",lines,"-> Missing 'if word!")
+    else:
+        print("Syntax_Error: Line",lines,"-> Missing 'then' word!")
         exit()
 
 ########################################################
@@ -745,39 +736,34 @@ def if_stat():
 def elsepart():
     global token
     global lines
-    
-    if(token=="elsetk"):
-        lex()
-        statements()
+
+    lex()
+    statements()
 
 ########################################################
 
 def repeat_stat():
     global token
     global lines
-    global exitlist 
+    global exitlist
     global repeatChecker
-    
-    if(token=="repeattk"):
-        repeatChecker.append(False)  #semantic analysis
+
+    repeatChecker.append(False)  #semantic analysis
+    lex()
+    Bquad = nextquad()  #intermediate code
+    statements()
+    if token=="endrepeattk":
+        if repeatChecker[len(repeatChecker)-1] == False:  #semantic analysis
+            print("Semantic_Error: Line", lines, "-> No exit statement inside repeat statement!")  #semantic analysis
+            exit()  #semantic analysis
+        repeatChecker.pop()
         lex()
-        Bquad = nextquad()  #intermediate code
-        statements()
-        if(token=="endrepeattk"):
-            if repeatChecker[len(repeatChecker)-1] == False:  #semantic analysis
-                print("Semantic_Error: Line", lines, "-> No exit statement inside repeat statement!")  #semantic analisys
-                exit()  #semantic analysis
-            repeatChecker.pop()
-            lex()
-            genquad("jump","_","_",Bquad)  #intermediate code
-            tmplist = makelist(nextquad())  #intermediate code
-            exitlist = merge(exitlist,tmplist)  #intermediate code
-            backpatch(exitlist, nextquad())  #intermediate code
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing 'endrepeat' word. Repeat command never ends!")
-            exit()
-    else: 
-        print("Syntax_Error: Line",lines," Missing 'repeat' word!")
+        genquad("jump","_","_",Bquad)  #intermediate code
+        tmplist = makelist(nextquad())  #intermediate code
+        exitlist = merge(exitlist,tmplist)  #intermediate code
+        backpatch(exitlist, nextquad())  #intermediate code
+    else:
+        print("Syntax_Error: Line",lines,"-> Missing 'endrepeat' word. Repeat command never ends!")
         exit()
 
 ########################################################
@@ -787,45 +773,37 @@ def exit_stat():
     global lines
     global exitlist
     global repeatChecker
-    
+
     exitlist.append(nextquad())  #intermediate code
     genquad("jump", "_", "_", "_")  #intermediate code
-    
-    if len(repeatChecker) == 0:  #semantic analisys
-        print("Semantic_Error: Line", lines, "-> Found exit statement, out of repeat statement!")  #semantic analisys
+
+    if len(repeatChecker) == 0:  #semantic analysis
+        print("Semantic_Error: Line", lines, "-> Found exit statement, out of repeat statement!")  #semantic analysis
         exit()  #semantic analysis
     elif len(repeatChecker) > 0:  #semantic analysis
         repeatChecker[len(repeatChecker)-1] = True  #semantic analysis
 
-    if(token=="exittk"):
-        lex()
-    else: 
-        print("Syntax_Error: Line",lines,"-> Missing 'exit' word!")
-        exit()
+    lex()
 
 ########################################################
 
 def while_stat():
     global token
     global lines
-    
-    if(token=="whiletk"):
+
+    lex()
+    Bquad = nextquad()  #intermediate code
+    B = condition()  #intermediate code
+    B_true = B[0]  #intermediate code
+    B_false = B[1]  #intermediate code
+    backpatch(B_true,nextquad())  #intermediate code
+    statements()
+    genquad("jump","_","_",Bquad)  #intermediate code
+    backpatch(B_false,nextquad())  #intermediate code
+    if token=="endwhiletk":
         lex()
-        Bquad = nextquad()  #intermediate code
-        B = condition()  #intermediate code
-        B_true = B[0]  #intermediate code
-        B_false = B[1]  #intermediate code
-        backpatch(B_true,nextquad())  #intermediate code
-        statements()
-        genquad("jump","_","_",Bquad)  #intermediate code
-        backpatch(B_false,nextquad())  #intermediate code
-        if(token=="endwhiletk"):
-            lex()
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing 'endwhile' word. While command never ends!")
-            exit()
-    else: 
-        print("Syntax_Error: Line",lines,"-> Missing 'while' word!")
+    else:
+        print("Syntax_Error: Line",lines,"-> Missing 'endwhile' word. While command never ends!")
         exit()
 
 #########################################################
@@ -833,60 +811,56 @@ def while_stat():
 def switch_stat():
     global token
     global lines
-    
-    if(token=="switchtk"):
+
+    lex()
+    exitlist = emptylist()  #intermediate code
+    EXP_1 = expression()  #intermediate code
+    if token=="casetk":
         lex()
-        exitlist = emptylist()  #intermediate code
-        EXP_1 = expression()  #intermediate code
-        if(token=="casetk"):
+        EXP_2 = expression()  #intermediate code
+        R_true = makelist(nextquad())  #intermediate code
+        genquad("=",EXP_1,EXP_2,"_")  #intermediate code
+        R_false = makelist(nextquad())  #intermediate code
+        genquad("jump","_","_","_")  #intermediate code
+        if token=="colontk":
             lex()
-            EXP_2 = expression()  #intermediate code
-            R_true = makelist(nextquad())  #intermediate code
-            genquad("=",EXP_1,EXP_2,"_")  #intermediate code
-            R_false = makelist(nextquad())  #intermediate code
+            backpatch(R_true, nextquad())  #intermediate code
+            statements()
+            tlist = makelist(nextquad())  #intermediate code
             genquad("jump","_","_","_")  #intermediate code
-            if(token=="colontk"):
-                lex()
-                backpatch(R_true, nextquad())  #intermediate code
-                statements()
-                tlist = makelist(nextquad())  #intermediate code
-                genquad("jump","_","_","_")  #intermediate code
-                exitlist = merge(exitlist,tlist)  #intermediate code
-                backpatch(R_false, nextquad())  #intermediate code
-                while(True):
-                    if(token=="casetk"):
+            exitlist = merge(exitlist,tlist)  #intermediate code
+            backpatch(R_false, nextquad())  #intermediate code
+            while True:
+                if token=="casetk":
+                    lex()
+                    EXP_2 = expression()  #intermediate code
+                    R_true = makelist(nextquad())  #intermediate code
+                    genquad("=",EXP_1,EXP_2,"_")  #intermediate code
+                    R_false = makelist(nextquad())  #intermediate code
+                    genquad("jump","_","_","_")  #intermediate code
+                    if token=="colontk":
                         lex()
-                        EXP_2 = expression()  #intermediate code
-                        R_true = makelist(nextquad())  #intermediate code
-                        genquad("=",EXP_1,EXP_2,"_")  #intermediate code   
-                        R_false = makelist(nextquad())  #intermediate code
-                        genquad("jump","_","_","_")  #intermediate code 
-                        if(token=="colontk"):
-                            lex()
-                            backpatch(R_true, nextquad())  #intermediate code
-                            statements()
-                            tlist = makelist(nextquad())  #intermediate code
-                            genquad("jump","_","_","_")  #intermediate code
-                            exitlist = merge(exitlist,tlist)  #intermediate code
-                            backpatch(R_false, nextquad())  #intermediate code
-                        else:
-                            print("Syntax_Error: Line",lines,"-> Missing ':' character!")
-                            exit()
-                    elif(token=="endswitchtk"):
-                        lex()
-                        backpatch(exitlist, nextquad())  #intermediate code
-                        break
-                    else: 
-                        print("Syntax_Error: Line",lines,"-> Missing 'endswitch'. Switch command never ends!")
+                        backpatch(R_true, nextquad())  #intermediate code
+                        statements()
+                        tlist = makelist(nextquad())  #intermediate code
+                        genquad("jump","_","_","_")  #intermediate code
+                        exitlist = merge(exitlist,tlist)  #intermediate code
+                        backpatch(R_false, nextquad())  #intermediate code
+                    else:
+                        print("Syntax_Error: Line",lines,"-> Missing ':' character!")
                         exit()
-            else: 
-                print("Syntax_Error: Line",lines,"-> Missing ':' character!")
-                exit()
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing 'case' word!")
+                elif token=="endswitchtk":
+                    lex()
+                    backpatch(exitlist, nextquad())  #intermediate code
+                    break
+                else:
+                    print("Syntax_Error: Line",lines,"-> Missing 'endswitch'. Switch command never ends!")
+                    exit()
+        else:
+            print("Syntax_Error: Line",lines,"-> Missing ':' character!")
             exit()
-    else: 
-        print("Syntax_Error: Line",lines,"-> Missing 'switch' word!")
+    else:
+        print("Syntax_Error: Line",lines,"-> Missing 'case' word!")
         exit()
 
 ##########################################################
@@ -894,53 +868,49 @@ def switch_stat():
 def forcase_stat():
     global token
     global lines
-    
-    if(token=="forcasetk"):
+
+    lex()
+    flag = newtemp()  #intermediate code
+    frquad = nextquad()  #intermediate code
+    genquad(":=","0","_",flag)  #intermediate code
+    if token=="whentk":
         lex()
-        flag = newtemp()  #intermediate code
-        frquad = nextquad()  #intermediate code
-        genquad(":=","0","_",flag)  #intermediate code
-        if(token=="whentk"):
+        COND = condition()  #intermediate code
+        COND_true = COND[0]  #intermediate code
+        COND_false = COND[1]  #intermediate code
+        if token=="colontk":
             lex()
-            COND = condition()  #intermediate code
-            COND_true = COND[0]  #intermediate code
-            COND_false = COND[1]  #intermediate code
-            if(token=="colontk"):
-                lex()
-                backpatch(COND_true, nextquad())  #intermediate code
-                statements()
-                genquad(":=","1","_",flag)  #intermediate code
-                backpatch(COND_false, nextquad())  #intermediate code
-                while(True):
-                    if(token=="whentk"):
+            backpatch(COND_true, nextquad())  #intermediate code
+            statements()
+            genquad(":=","1","_",flag)  #intermediate code
+            backpatch(COND_false, nextquad())  #intermediate code
+            while True:
+                if token=="whentk":
+                    lex()
+                    COND = condition()  #intermediate code
+                    COND_true = COND[0]  #intermediate code
+                    COND_false = COND[1]  #intermediate code
+                    if token=="colontk":
                         lex()
-                        COND = condition()  #intermediate code
-                        COND_true = COND[0]  #intermediate code
-                        COND_false = COND[1]  #intermediate code
-                        if(token=="colontk"): 
-                            lex()
-                            backpatch(COND_true, nextquad())  #intermediate code
-                            statements()
-                            genquad(":=","1","_",flag)  #intermediate code
-                            backpatch(COND_false, nextquad())  #intermediate code
-                        else:
-                            print("Syntax_Error: Line",lines,"-> Missing ':' character!")
-                            exit()
-                    elif(token=="endforcasetk"):
-                        genquad("=",flag,"1",firstquad)  #intermediate code
-                        lex()
-                        break
-                    else: 
-                        print("Syntax_Error: Line",lines,"-> Missing 'endforcase'. Forcase command never ends!")
+                        backpatch(COND_true, nextquad())  #intermediate code
+                        statements()
+                        genquad(":=","1","_",flag)  #intermediate code
+                        backpatch(COND_false, nextquad())  #intermediate code
+                    else:
+                        print("Syntax_Error: Line",lines,"-> Missing ':' character!")
                         exit()
-            else: 
-                print("Syntax_Error: Line",lines,"-> Missing ':' character!")
-                exit()
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing 'when' word!")
+                elif token=="endforcasetk":
+                    genquad("=",flag,"1",firstquad)  #intermediate code
+                    lex()
+                    break
+                else:
+                    print("Syntax_Error: Line",lines,"-> Missing 'endforcase'. Forcase command never ends!")
+                    exit()
+        else:
+            print("Syntax_Error: Line",lines,"-> Missing ':' character!")
             exit()
-    else: 
-        print("Syntax_Error: Line",lines,"-> Missing 'forcase' word!")
+    else:
+        print("Syntax_Error: Line",lines,"-> Missing 'when' word!")
         exit()
 
 ##########################################################
@@ -949,20 +919,16 @@ def call_stat():
     global token
     global lines
     global value
-    
-    if(token=="calltk"):
+
+    lex()
+    if token=="idtk":
+        searchEntity(value, "PROC")  #semantic analysis
+        NAME = value  #intermediate code
         lex()
-        if(token=="idtk"):
-            searchEntity(value, "PROC")  #symbol table
-            NAME = value  #intermediate code
-            lex()
-            actualpars(NAME)  #intermediate code
-            genquad("call",NAME,"_","_")  #intermediate code
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing call id!")
-            exit()
-    else: 
-        print("Syntax_Error: Line:",lines,"-> Missing 'call' word!")
+        actualpars(NAME)  #intermediate code
+        genquad("call",NAME,"_","_")  #intermediate code
+    else:
+        print("Syntax_Error: Line",lines,"-> Missing call id!")
         exit()
 
 ##########################################################
@@ -971,13 +937,14 @@ def actualpars(id_name):
     global token
     global lines
     global is_function
-    
-    if(token=="openroundbrackettk"): 
+
+    if token=="openroundbrackettk":
         lex()
-        actualparlist(id_name)
-        if(token=="closeroundbrackettk"):
+        if token!="closeroundbrackettk":
+            actualparlist(id_name)
+        if token=="closeroundbrackettk":
             lex()
-        else: 
+        else:
             print("Syntax_Error: Line",lines,"-> Missing ')' character. Brackets never close!")
             exit()
         if is_function == True:  #intermediate code
@@ -986,7 +953,7 @@ def actualpars(id_name):
             genquad("call",id_name,"_","_")  #intermediate code
             is_function = False  #intermediate code
             return return_value  #intermediate code
-    else: 
+    else:
         print("Syntax_Error: Line",lines,"-> Missing '('. No brackets detected!")
         exit()
 
@@ -995,14 +962,14 @@ def actualpars(id_name):
 def actualparlist(id_name):
     global token
     global lines
-    
+
     number_of_pars = 0  #semantic analysis
     PARS = []
-    
+
     PARMODE = actualparitem()
     PARS.append(PARMODE)
     number_of_pars += 1  #semantic analysis
-    while(token=="commatk"):
+    while token=="commatk":
         lex()
         PARMODE = actualparitem()
         PARS.append(PARMODE)
@@ -1015,17 +982,17 @@ def actualparitem():
     global token
     global lines
     global value
-    
+
     PARMODE = ""  #semantic analysis
-    
-    if(token=="intk"):
+
+    if token=="intk":
         lex()
         EXP = expression()  #intermediate code
         genquad("par",EXP,"in","_")  #intermediate code
         PARMODE = "in"  #semantic analysis
-    elif(token=="inouttk"):
+    elif token=="inouttk":
         lex()
-        if(token=="idtk"):
+        if token=="idtk":
             searchEntity(value, "VAR")  #symbol table
             NAME = value  #intermediate code
             lex()
@@ -1045,15 +1012,12 @@ def return_stat():
     global token
     global lines
     global hasReturn
-    
-    if(token=="returntk"):
-        hasReturn[len(hasReturn)-1] = True  #semantic analisys
-        lex()
-        E_place = expression()  #intermediate code
-        genquad("ret",E_place,"_","_")  #intermediate code
-    else: 
-        print("Syntax_Error: Line",lines,"-> Missing 'return' word!")
-        exit()
+
+    hasReturn[len(hasReturn)-1] = True  #semantic analysis
+    lex()
+    E_place = expression()  #intermediate code
+    genquad("ret",E_place,"_","_")  #intermediate code
+
     return E_place  #intermediate code
 
 ###########################################################
@@ -1061,14 +1025,10 @@ def return_stat():
 def print_stat():
     global token
     global lines
-    
-    if(token=="printtk"):
-        lex()
-        E_place = expression()  #intermediate code
-        genquad("out", E_place, "_", "_")  #intermediate code
-    else: 
-        print("Syntax_Error: Line",lines,"-> Missing 'print' word!")
-        exit()
+
+    lex()
+    E_place = expression()  #intermediate code
+    genquad("out", E_place, "_", "_")  #intermediate code
 
 ##########################################################
 
@@ -1076,31 +1036,27 @@ def input_stat():
     global token
     global lines
     global value
-    
-    if(token=="inputtk"):
+
+    lex()
+    if token=="idtk":
+        searchEntity(value, "VAR")  #symbol table
+        id_place = value  #intermediate code
         lex()
-        if(token=="idtk"):
-            searchEntity(value, "VAR")  #symbol table
-            id_place = value  #intermediate code
-            lex()
-            genquad("inp", id_place, "_", "_")  #intermediate code
-        else: 
-            print("Syntax_Error: Line",lines,"-> Missing id name!")
-            exit()
-    else: 
-        print("Syntax_Error: Line",lines,"-> Missing 'input' word!")
+        genquad("inp", id_place, "_", "_")  #intermediate code
+    else:
+        print("Syntax_Error: Line",lines,"-> Missing id name!")
         exit()
-    
+
 ##########################################################
 
 def condition():
     global token
     global lines
-    
+
     Q1 = boolterm()  #intermediate code
     B_true = Q1[0]  #intermediate code
     B_false = Q1[1]  #intermediate code
-    while(token=="ortk"):
+    while token=="ortk":
         lex()
         backpatch(B_false, nextquad())  #intermediate code
         Q2 = boolterm()  #intermediate code
@@ -1113,11 +1069,11 @@ def condition():
 def boolterm():
     global token
     global lines
-    
+
     R1 = boolfactor()  #intermediate code
     Q_true = R1[0]  #intermediate code
     Q_false = R1[1]  #intermediate code
-    while(token=="andtk"):  #intermediate code
+    while token=="andtk":  #intermediate code
         lex()
         backpatch(Q_true, nextquad())  #intermediate code
         R2 = boolfactor()  #intermediate code
@@ -1130,35 +1086,35 @@ def boolterm():
 def boolfactor():
     global token
     global lines
-    
-    if(token=="nottk"):
+
+    if token=="nottk":
         lex()
-        if(token=="opensquarebrackettk"):
+        if token=="opensquarebrackettk":
             lex()
             B = condition()  #intermediate code
             R_true = B[0]  #intermediate code
             R_false = B[1]  #intermediate code
-            if(token=="closesquarebrackettk"):
+            if token=="closesquarebrackettk":
                 lex()
-            else: 
+            else:
                 print("Syntax_Error: Line",lines,"-> Missing ']' character. Brackets never close!")
                 exit()
             return [R_false, R_true]  #intermediate code
-        else: 
+        else:
             print("Syntax_Error: Line",lines,"-> Missing brackets!")
             exit()
-    elif(token=="opensquarebrackettk"):
+    elif token=="opensquarebrackettk":
         lex()
         B = condition()  #intermediate code
         R_true = B[0]  #intermediate code
         R_false = B[1]  #intermediate code
-        if(token=="closesquarebrackettk"):
+        if token=="closesquarebrackettk":
             lex()
-        else: 
+        else:
             print("Syntax_Error: Line",lines,"-> Missing ']' character. Brackets never close!")
             exit()
         return [R_true, R_false]  #intermediate code
-    elif(token=="plustk" or token=="minustk" or token=="numbertk" or token=="idtk" or token=="openroundbrackettk"):
+    elif token=="plustk" or token=="minustk" or token=="numbertk" or token=="idtk" or token=="openroundbrackettk":
         E1_place = expression()  #intermediate code
         RELOP = relational_oper()  #intermediate code
         E2_place = expression()  #intermediate code
@@ -1167,17 +1123,17 @@ def boolfactor():
         R_false = makelist(nextquad())  #intermediate code
         genquad("jump","_","_","_")  #intermediate code
         return [R_true, R_false]  #intermediate code
-    elif(token=="truetk"):
+    elif token=="truetk":
         lex()
         R_true = makelist(nextquad())  #intermediate code
         genquad("jump","_","_","_")  #intermediate code
         return [R_true, []]  #intermediate code
-    elif(token=="falsetk"):
+    elif token=="falsetk":
         lex()
         R_false = makelist(nextquad())  #intermediate code
         genquad("jump","_","_","_")  #intermediate code
         return [[], R_false]  #intermediate code
-    else: 
+    else:
         print("Syntax_Error: Line",lines,"-> Missing bool factor!")
         exit()
 
@@ -1186,14 +1142,14 @@ def boolfactor():
 def expression():
     global token
     global lines
-    
+
     SIGN = optional_sign()  #intermediate code
     if SIGN == "-":  #intermediate code
         T1_place = "-"+str(term())  #intermediate code
     else:
         T1_place = str(term())  #intermediate code
-    
-    while(token=="plustk" or token=="minustk"):
+
+    while token=="plustk" or token=="minustk":
         SIGN = add_oper()  #intermediate code
         T2_place = str(term())  #intermediate code
         w = newtemp()  #intermediate code
@@ -1207,10 +1163,10 @@ def expression():
 def term():
     global token
     global lines
-    
+
     F1_place = factor()  #intermediate code
-    while(token=="asterisktk" or token=="slashtk"):
-        OPER = mul_oper() 
+    while token=="asterisktk" or token=="slashtk":
+        OPER = mul_oper()
         F2_place = factor()  #intermediate code
         w = newtemp()  #intermediate code
         genquad(OPER,F1_place,F2_place,w)  #intermediate code
@@ -1224,22 +1180,22 @@ def factor():
     global token
     global lines
     global value
-    
+
     F_place=""  #intermediate code
-    
-    if(token=="numbertk"):
+
+    if token=="numbertk":
         F_place = value  #intermediate code
         lex()
-    elif(token=="openroundbrackettk"):
+    elif token=="openroundbrackettk":
         lex()
         E_place = expression()  #intermediate code
-        if(token=="closeroundbrackettk"):
+        if token=="closeroundbrackettk":
             lex()
             F_place = E_place  #intermediate code
-        else: 
+        else:
             print("Syntax_Error: Line",lines,"-> Missing ')' character. Brackets never close!")
             exit()
-    elif(token=="idtk"):
+    elif token=="idtk":
         id_name = value  #intermediate code
         lex()
         return_value = idtail(id_name)  #intermediate code
@@ -1249,7 +1205,7 @@ def factor():
         else:
             searchEntity(id_name, "FUNC")  #symbol table
             F_place = return_value  #intermediate code
-    else: 
+    else:
         print("Syntax_Error: Line",lines,"-> No number, or expression or id typed!")
         exit()
     return F_place  #intermediate code
@@ -1260,8 +1216,8 @@ def idtail(id_name):
     global token
     global lines
     global is_function
-    
-    if(token=="openroundbrackettk"):
+
+    if token=="openroundbrackettk":
         is_function = True  #intermediate code
         return_value = actualpars(id_name)  #intermediate code
         return return_value  #intermediate code
@@ -1274,11 +1230,11 @@ def relational_oper():
     global token
     global lines
     global value
-    
-    if(token=="equalstk" or token=="lessequalstk" or token=="greaterequalstk" or token=="greatertk" or token=="lesstk" or token=="notequalstk"):
+
+    if token=="equalstk" or token=="lessequalstk" or token=="greaterequalstk" or token=="greatertk" or token=="lesstk" or token=="notequalstk":
         RELOP = value  #intermediate code
         lex()
-    else: 
+    else:
         print("Syntax_Error: Line",lines,"-> Missing '=' or '<=' or '>=' or '>' or '<' or '<>' operator symbol!")
         exit()
     return RELOP  #intermediate code
@@ -1289,11 +1245,11 @@ def add_oper():
     global token
     global lines
     global value
-    
-    if(token=="plustk" or token=="minustk"):
+
+    if token=="plustk" or token=="minustk":
         SIGN = value  #intermediate code
         lex()
-    else: 
+    else:
         print("Syntax_Error: Line",lines,"-> Missing '+' '-' operator symbol!")
         exit()
     return SIGN  #intermediate code
@@ -1304,11 +1260,11 @@ def mul_oper():
     global token
     global lines
     global value
-    
-    if(token=="asterisktk" or token=="slashtk"):
+
+    if token=="asterisktk" or token=="slashtk":
         OPER = value  #intermediate code
         lex()
-    else: 
+    else:
         print("Syntax_Error: Line",lines,"-> Missing '*' or '/' operator symbol!")
         exit()
     return OPER  #intermediate code
@@ -1318,8 +1274,8 @@ def mul_oper():
 def optional_sign():
     global token
     global lines
-    
-    if(token=="plustk" or token=="minustk"):
+
+    if token=="plustk" or token=="minustk":
         SIGN = add_oper()  #intermediate code
         return SIGN  #intermediate code
     else:
@@ -1329,34 +1285,34 @@ def optional_sign():
 
 def productIntFile(): #write intermediate code in file (in form: test.int)
     global quadsList
-    
+
     int_name = sys.argv[1][:-4]
     f = open(int_name+".int", "w") #open test.int file for writing
-   
+
     for i in range(len(quadsList)): #write in file contents of quadsList
         f.write(str(quadsList[i][0]) +":"+str(quadsList[i][1][0])+","+str(quadsList[i][1][1])+","+str(quadsList[i][1][2])+","+str(quadsList[i][1][3])+"\n")
 
     f.close() #close test.int file
-    
+
 ############################################################
 
 def productCFile(): #product code in C (in form: test.c)
     varList = [] #list for variables
-    variables = "" #string with variables 
+    variables = "" #string with variables
     contentsInMain = [] #contents for main block
     L_counter = 1 #counter for Labels
-    
+
     int_name = sys.argv[1][:-4]
     f = open(int_name+".int", "r") #open test.int for reading
-    
+
     for line in f: #read line by line
-        
+
         line = line.replace(":"," ",1) #replace : character with " "
         line = line.replace(","," ") #replace , character with " "
         line = line.replace("\n","") #replace \n character with " "
-        
-        words = line.split(" ") #split line in " " character, result in list words 
-        
+
+        words = line.split(" ") #split line in " " character, result in list words
+
         #in any case save contents in List contentsInMain and variables in List varList
         if words[1] == ":=":
             contentsInMain.append("\tL_" + str(L_counter) + ": " + str(words[4]) + "=" + str(words[2]) + ";\n")
@@ -1374,64 +1330,64 @@ def productCFile(): #product code in C (in form: test.c)
             contentsInMain.append("\tL_" + str(L_counter) + ": " + str(words[4]) + "=" + str(words[2]) + "/" + str(words[3]) + ";\n")
             varList.append(words[4])
         elif words[1] == "<":
-            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + "<" + str(words[3]) + ") goto L_" + str(int(words[4])-1) + ";\n")
+            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + "<" + str(words[3]) + ") goto L_" + str(int(words[4])) + ";\n")
             varList.append(words[2])
         elif words[1] == ">":
-            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + ">" + str(words[3]) + ") goto L_" + str(int(words[4])-1) + ";\n")
+            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + ">" + str(words[3]) + ") goto L_" + str(int(words[4])) + ";\n")
             varList.append(words[2])
         elif words[1] == "<=":
-            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + "<=" + str(words[3]) + ") goto L_" + str(int(words[4])-1) + ";\n")
+            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + "<=" + str(words[3]) + ") goto L_" + str(int(words[4])) + ";\n")
             varList.append(words[2])
         elif words[1] == ">=":
-            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + ">=" + str(words[3]) + ") goto L_" + str(int(words[4])-1) + ";\n")
+            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + ">=" + str(words[3]) + ") goto L_" + str(int(words[4])) + ";\n")
             varList.append(words[2])
         elif words[1] == "=":
-            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + "==" + str(words[3]) + ") goto L_" + str(int(words[4])-1) + ";\n")
+            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + "==" + str(words[3]) + ") goto L_" + str(int(words[4])) + ";\n")
             varList.append(words[2])
         elif words[1] == "<>":
-            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + "!=" + str(words[3]) + ") goto L_" + str(int(words[4])-1) + ";\n")
+            contentsInMain.append("\tL_" + str(L_counter) + ": " + "if (" + str(words[2]) + "!=" + str(words[3]) + ") goto L_" + str(int(words[4])) + ";\n")
             varList.append(words[2])
         elif words[1] == "out":
             contentsInMain.append("\tL_" + str(L_counter) + ": " + "printf(\"%d\\n\", " + words[2] + ");\n")
         elif words[1] == "inp":
             contentsInMain.append("\tL_" + str(L_counter) + ": " + "scanf(\"%d\", &" + words[2] + ");\n")
         elif words[1] == "jump":
-            contentsInMain.append("\tL_" + str(L_counter) + ": " + "goto L_" + str(int(words[4])-1) + ";\n")
+            contentsInMain.append("\tL_" + str(L_counter) + ": " + "goto L_" + str(int(words[4])) + ";\n")
         elif words[1] == "halt":
             contentsInMain.append("\tL_" + str(L_counter) + ": {}\n")
             contentsInMain.append("}")
         else:
             L_counter -= 1 #ignore begin_block, end_block
         L_counter += 1 #increase counter for Labels
-        
+
     f.close() #close test.int file
-    
-    for i in range(0,len(varList)-2): #create string with variables in form "var,var,var,...,var;"
-        variables += varList[i]
+
+    for i in range(0,len(set(varList))-2): #create string with variables in form "var,var,var,...,var;"
+        variables += list(set(varList))[i]
         variables += ","
-    variables += varList[len(varList)-1]
+    variables += varList[len(set(varList))-1]
     variables += ";"
-    
+
     c_name = sys.argv[1][:-4]
     cFile = open(c_name+".c", 'w') #open test.c file for writing
-    
-    cFile.write("#include <stdio.h>\n") 
+
+    cFile.write("#include <stdio.h>\n")
     cFile.write("\n")
     cFile.write("int main()\n")
     cFile.write("{\n")
     cFile.write("\tint " + variables + "\n") #write string with variables at the beginning of the main block
     cFile.write("\tL_0: \n")
-    
+
     for c in contentsInMain: #write the contents from contentsInMain List in main block
         cFile.write(c)
-        
+
     cFile.close() #close test.c file
-    
+
 ############################################################
 #SYMBOL TABLE!!
 def addScope(): #create and init a scope and add it to the list scopes
     global scopes
-    
+
     scope = {}
     scope["entities"] = []
     scope["nestingLevel"] = len(scopes)
@@ -1440,7 +1396,7 @@ def addScope(): #create and init a scope and add it to the list scopes
 
 def calculateFL(): #calculate value of Frame Length and add it in the right field
     global scopes
-    
+
     FL = 12
     for entity in scopes[len(scopes)-1]["entities"]:
         if entity["entity_type"] != "procorfunc":
@@ -1453,20 +1409,20 @@ def calculateFL(): #calculate value of Frame Length and add it in the right fiel
 
 def removeScope(): #remove a scope, and also mark the creation of a proc or func
     global scopes #this compiler doesen't support recursion, so I need to track if a function is ready for use
-    
+
     entitiesLength = len(scopes[len(scopes)-2]["entities"])
     if entitiesLength > 0:
         scopes[len(scopes)-2]["entities"][entitiesLength - 1]["READY"] = True
-    
+
     scopes.pop()
 
-def addEntity(entity_name, entity_type, par3): #create and init an entity and insert it in the entities list of the current scope 
+def addEntity(entity_name, entity_type, par3): #create and init an entity and insert it in the entities list of the current scope
     global scopes #par3 is here only for a few cases
-    
+
     entity = {}
     entity["entity_name"] = entity_name
     entity["entity_type"] = entity_type
-    
+
     if entity_type == "variable":
         entity["offset"] = scopes[len(scopes)-1]["current_offset"]
         scopes[len(scopes)-1]["current_offset"] += 4
@@ -1483,24 +1439,24 @@ def addEntity(entity_name, entity_type, par3): #create and init an entity and in
     elif entity_type == "tempvar":
         entity["offset"] = scopes[len(scopes)-1]["current_offset"]
         scopes[len(scopes)-1]["current_offset"] += 4
-        
+
     scopes[len(scopes)-1]["entities"].append(entity)
-    
+
 def addArgument(parMode): #create and init an argument and add it in the list of a proc or func entity
     global scopes
-    
+
     argument = {}
     argument["parMode"] = parMode
-    
+
     entitiesLength = len(scopes[len(scopes)-2]["entities"])
     if entitiesLength > 0:
         scopes[len(scopes)-2]["entities"][entitiesLength-1]["arguments"].append(argument)
-        
-    
+
+
 def searchEntity(name, TYPE): #check if a variable is valid, if not ERROR happens.
     global scopes #special case here TYPE == "PROCORFUNC", doesen't check but just returns the entity
     global lines #special case here TYPE == "VAR" doesen't refer only to variables
-    
+
     for scope in reversed(scopes):
         for entity in scope["entities"]:
             if name == entity["entity_name"]:
@@ -1515,30 +1471,30 @@ def searchEntity(name, TYPE): #check if a variable is valid, if not ERROR happen
                         return entity
                 elif TYPE == "PROCORFUNC":
                     return entity
-    print("Semantic_Error: Line", lines, "-> Entity ", "type:", TYPE, " ", name, " not found!")
+    print("Semantic_Error: Line", lines+1, "-> Entity type:", TYPE, "", name, " not found!")
     exit()
-    
+
 def checkEntityExists(name): #checks for duplicates of an entity
     global scopes #it happens only in the current scope
-    global lines #it uses only the name of the entity, eg. var A with name X, and func B with name X cannot exist in the same scope 
-    
+    global lines #it uses only the name of the entity, eg. var A with name X, and func B with name X cannot exist in the same scope
+
     for entity in scopes[len(scopes)-1]["entities"]:
         if name == entity["entity_name"]:
             print("Semantic_Error: Line", lines, "-> Entity ", name, " already exists!")
             exit()
-                
+
 def setSQ(start_quad): #setter for Start Quad
     global scopes
-    
+
     entitiesLength = len(scopes[len(scopes)-1]["entities"])
     if entitiesLength > 0:
         scopes[len(scopes)-1]["entities"][entitiesLength-1]["start_quad"] = start_quad
-    
+
 def checkArguments(id_name, pars): #checks if a proc or func is defined with a list of pars
     global lines
-    
+
     entity = searchEntity(id_name, "PROCORFUNC")
-    
+
     if len(entity["arguments"]) != len(pars):
         print("Semantic_Error: Line", lines, "-> In ", entity["entity_type"], " ", entity["entity_name"], " wrong number of arguments!")
         exit()
@@ -1552,17 +1508,17 @@ def checkArguments(id_name, pars): #checks if a proc or func is defined with a l
 #Functions used for Final Code
 def getScopeDistance(variable): #returns the distance of a variable. This function is used in gnlvcode()
     global scopes
-    
+
     distance = -1
     for scope in reversed(scopes):
         distance += 1
         for entity in scope["entities"]:
             if entity["entity_name"] == variable:
                 return distance
-            
-def getEntityField(entity_name, field): #getter for entity fields 
-    global scopes #we have 2 special cases here, (1)return a whole entity, (2)return the scope that cointains the entity  
-    
+
+def getEntityField(entity_name, field): #getter for entity fields
+    global scopes #we have 2 special cases here, (1)return a whole entity, (2)return the scope that cointains the entity
+
     for scope in reversed(scopes):
         for entity in scope["entities"]:
             if entity["entity_name"] == entity_name:
@@ -1572,22 +1528,22 @@ def getEntityField(entity_name, field): #getter for entity fields
                     return entity
                 else:
                     return entity[field]
-                
+
 def checkVariableType(variable): #does some important job for loadvr and storerv functions
     global scopes #determines the type of a variable and returns it as a string
-    
+
     if str(variable).isdigit():
         return "immediate"
-    
+
     variableScope = getEntityField(variable, "scope")
-    
+
     if variableScope["nestingLevel"] == 0:
         return "global"
-    
+
     variableType = getEntityField(variable, "entity_type")
     variableEntity = getEntityField(variable, "entity")
-    
-    
+
+
     if variableType == "variable":
         if variableScope["nestingLevel"] == scopes[len(scopes)-1]["nestingLevel"]:
             return "varCurr"
@@ -1607,8 +1563,8 @@ def checkVariableType(variable): #does some important job for loadvr and storerv
     elif variableType == "tempvar":
         return "tempvar"
 
-    
-def createCall(callEntity): #very important function.
+
+def createCall(callEntity, callee_scope): #very important function.
     global pars #This function is responsible for setting the parameters and calling a proc or func
     global current_quadToASM
 
@@ -1616,14 +1572,13 @@ def createCall(callEntity): #very important function.
     firstLABEL = LABEL
     i = 0
     for par in pars:
-        
         if LABEL == firstLABEL: #the first time set some more things
             addToASM("L" + str(LABEL) + ":")
             addToASM("\t addi $fp, $sp, " + str(callEntity["frame_length"]))
         else:
             addToASM("L" + str(LABEL) + ":")
         LABEL += 1
-        
+
         if par[1] == "in":
             loadvr(par[0]["entity_name"], 0)
             addToASM("\t sw $t0, -" + str(12+4*i) + "($fp)")
@@ -1659,19 +1614,18 @@ def createCall(callEntity): #very important function.
         elif par[1] == "ret":
             addToASM("\t addi $t0, $sp, -" + str(par[0]["offset"]))
             addToASM("\t sw $t0, -8($fp)")
-            
+
     addToASM("L" + str(LABEL) + ":") #calls the proc or func
-    parScope = getEntityField(par[0]["entity_name"], "scope")
     callerScope = getEntityField(callEntity["entity_name"], "scope")
-    if parScope["nestingLevel"] == callerScope["nestingLevel"]:
+    if callee_scope == callerScope["nestingLevel"]:
         addToASM("\t lw $t0, -4($sp)")
         addToASM("\t sw $t0, -4($fp)")
     else:
         addToASM("\t sw $sp, -4($fp)")
     addToASM("\t addi $sp $sp, " + str(callEntity["frame_length"]))
     addToASM("\t jal " + callEntity["entity_name"])
-    addToASM("\t addi $sp $sp, -" + str(callEntity["frame_length"])) 
-    
+    addToASM("\t addi $sp $sp, -" + str(callEntity["frame_length"]))
+
 ############################################################
 #FINAL CODE
 def gnlvcode(v): #brings a variable to a register
@@ -1683,12 +1637,12 @@ def gnlvcode(v): #brings a variable to a register
         scopeDistance -= 1
     entityOffset = getEntityField(v, "offset")
     addToASM("\t addi $t0, $t0, -" + str(entityOffset))
-    
+
 def loadvr(v, r): #loads a value to a specific register
     vType = checkVariableType(v)
-    
+
     entityOffset = getEntityField(v, "offset")
-    
+
     if vType == "immediate":
         addToASM("\t li  $t" + str(r) + ", " + v)
     elif vType == "global":
@@ -1705,12 +1659,12 @@ def loadvr(v, r): #loads a value to a specific register
         gnlvcode(v)
         addToASM("\t lw  $t0, ($t0)")
         addToASM("\t lw  $t" + str(r) + ", ($t0)")
-    
+
 def storerv(r, v): #stores a value to a specific register
     vType = checkVariableType(v)
-    
+
     entityOffset = getEntityField(v, "offset")
-    
+
     if vType == "global":
         addToASM("\t sw  $t" + str(r) + " -" + str(entityOffset) + "($s0)")
     elif vType in ["varCurr", "parInCurr", "tempvar"]:
@@ -1728,23 +1682,25 @@ def storerv(r, v): #stores a value to a specific register
 
 def addToASM(string): #writes to the Global ASM file
     global asmFile
-    
+
     asmFile.write(string+"\n")
-    
+
 def finalCode(isMain): #main function for producing the final code
     global quadsList #it is called when a piece ofintermediate code is set, and the symbol table for this code is ready
     global current_quadToASM #this moment, is an instance before we remove the current scope
     global main_scope
     global pars
 
+    current_scope = 0
+
     if current_quadToASM == 0:
         addToASM("L0:")
         addToASM("\t j Lmain")
-    
+
     for quad_number in range(current_quadToASM, len(quadsList)):
-    
+
         q = quadsList[current_quadToASM] #set this variable = q to shorten it
-        
+
         if q[1][0] == "jump":
             addToASM("L" + str(int(q[0])+1) + ":")
             addToASM("\t j L" + str(int(q[1][3])+1))
@@ -1755,7 +1711,7 @@ def finalCode(isMain): #main function for producing the final code
             opi = ["<", ">", "<=", ">=", "=", "<>"].index(q[1][0])
             op = ["blt", "bgt", "ble", "bge", "beq", "bne"][opi]
             addToASM("\t " + op + " $t1, $t2, L" + str(int(q[1][3])+1))
-        elif q[1][0] == ":=": 
+        elif q[1][0] == ":=":
             addToASM("L" + str(int(q[0])+1) + ":")
             loadvr(q[1][1], 1)
             storerv(1, q[1][3])
@@ -1789,7 +1745,7 @@ def finalCode(isMain): #main function for producing the final code
             pars.append([searchEntity(q[1][1], "VAR"), q[1][2]])
         elif q[1][0] == "call":
             callEntity = searchEntity(q[1][1], "PROCORFUNC") #create the call and empty the pars list
-            createCall(callEntity)
+            createCall(callEntity, current_scope)
             pars = []
         elif q[1][0] == "begin_block": #we need to know if main function begins here
             if isMain == False:
@@ -1801,11 +1757,13 @@ def finalCode(isMain): #main function for producing the final code
                 addToASM("L" + str(int(q[0])+1) + ":")
                 addToASM("\t addi $sp, $sp, " + str(main_scope["main_fl"]))
                 addToASM("\t move $s0, $sp")
+            current_scope += 1;
         elif q[1][0] == "end_block":
             if isMain == False:
                 addToASM("L" + str(int(q[0])+1) + ":")
                 addToASM("\t lw $ra, ($sp)")
                 addToASM("\t jr $ra")
+            current_scope -= 1;
         elif q[1][0] == "halt":
             addToASM("L" + str(int(q[0])+1) + ":")
 

@@ -1,0 +1,11 @@
+program example4
+	//declare a enddeclare
+
+	procedure proc ()
+	endprocedure
+
+  call proc()
+  //a := b;
+  //a := c;
+
+endprogram
