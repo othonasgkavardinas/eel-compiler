@@ -871,7 +871,7 @@ def forcase_stat():
 
     lex()
     flag = newtemp()  #intermediate code
-    frquad = nextquad()  #intermediate code
+    firstquad = nextquad()  #intermediate code
     genquad(":=","0","_",flag)  #intermediate code
     if token=="whentk":
         lex()
@@ -1362,11 +1362,12 @@ def productCFile(): #product code in C (in form: test.c)
 
     f.close() #close test.int file
 
-    for i in range(0,len(set(varList))-2): #create string with variables in form "var,var,var,...,var;"
-        variables += list(set(varList))[i]
-        variables += ","
-    variables += varList[len(set(varList))-1]
-    variables += ";"
+    if varList != []:
+        for i in range(0,len(set(varList))-2): #create string with variables in form "var,var,var,...,var;"
+            variables += list(set(varList))[i]
+            variables += ","
+        variables += varList[len(set(varList))-1]
+        variables += ";"
 
     c_name = sys.argv[1][:-4]
     cFile = open(c_name+".c", 'w') #open test.c file for writing
@@ -1375,7 +1376,8 @@ def productCFile(): #product code in C (in form: test.c)
     cFile.write("\n")
     cFile.write("int main()\n")
     cFile.write("{\n")
-    cFile.write("\tint " + variables + "\n") #write string with variables at the beginning of the main block
+    if varList != []:
+        cFile.write("\tint " + variables + "\n") #write string with variables at the beginning of the main block
     cFile.write("\tL_0: \n")
 
     for c in contentsInMain: #write the contents from contentsInMain List in main block
@@ -1532,7 +1534,7 @@ def getEntityField(entity_name, field): #getter for entity fields
 def checkVariableType(variable): #does some important job for loadvr and storerv functions
     global scopes #determines the type of a variable and returns it as a string
 
-    if str(variable).isdigit():
+    if str(variable).lstrip("-").isdigit():
         return "immediate"
 
     variableScope = getEntityField(variable, "scope")
@@ -1631,7 +1633,7 @@ def createCall(callEntity, callee_scope): #very important function.
 def gnlvcode(v): #brings a variable to a register
     addToASM("\t lw  $t0, -4($sp)")
     scopeDistance = getScopeDistance(v)
-    scopeDistance -=1
+    scopeDistance -= 1
     while scopeDistance > 0:
         addToASM("\t lw  $t0, -4($t0)")
         scopeDistance -= 1
@@ -1725,10 +1727,9 @@ def finalCode(isMain): #main function for producing the final code
             storerv(1, q[1][3])
         elif q[1][0] == "out":
             addToASM("L" + str(int(q[0])+1) + ":")
-            addToASM("\t li $v0, 1")
-            gnlvcode(q[1][1])
             loadvr(q[1][1], 1)
-            addToASM("\t li $a0, $t1")
+            addToASM("\t move $a0, $t1")
+            addToASM("\t li $v0, 1")
             addToASM("\t syscall")
         elif q[1][0] == "inp":
             addToASM("L" + str(int(q[0])+1) + ":")
