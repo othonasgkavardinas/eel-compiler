@@ -1646,7 +1646,7 @@ def loadvr(v, r): #loads a value to a specific register
     entityOffset = getEntityField(v, "offset")
 
     if vType == "immediate":
-        addToASM("\t li  $t" + str(r) + ", " + v)
+        addToASM("\t li  $t" + str(r) + ", " + str(v))
     elif vType == "global":
         addToASM("\t lw  $t" + str(r) + " -" + str(entityOffset) + "($s0)")
     elif vType in ["varCurr", "parInCurr", "tempvar"]:
