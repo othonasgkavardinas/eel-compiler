@@ -28,7 +28,7 @@ Assignment and report.
 Working tests.  
 Most updated test: full_example.eel
 
-### Run
+### Use
 python3 eel.py tests/full_example.eel
 
 ### Note
